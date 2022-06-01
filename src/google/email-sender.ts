@@ -2,7 +2,6 @@
 import nodemailer from 'nodemailer';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
 import fs from 'fs';
-import path from 'path';
 
 export default class EmailSenderService
 {
@@ -22,33 +21,36 @@ export default class EmailSenderService
         return transporter;
     }
 
-    getDummyMailOptions() {
+    getMailOptions( payload : Object | any  ) {
         const mailOptions = {
-            from : 'sundayluckyenyinnadeveloper@gmail.com',
-            to : 'sundayenyinna360@gmail.com',
-            subject : 'Testing out the nodemailer sender',
-            text : 'Hi, this is your guy sending email using the nodemailer node modules',
+            sender : 'Quatron@springarr.development.backup',
+            to : payload.emails,
+            subject : payload.subject,
+            html: payload.html,
+            text : payload.text,
             attachments:[
                 {
-                    filename : 'nepa.pdf',
-                    content : fs.createReadStream(this.getFilePath())
+                    filename : payload.filename + '.zip',
+                    content : fs.createReadStream( payload.zipFilePath )
                 }
             ]
         };
         return mailOptions;
     }
 
-    sendEmail(){
-        this.getTransporter().sendMail( this.getDummyMailOptions(), function(error, info){
-            if(error){ console.log(error)}
-            else{
-                console.log('Email sent: ' + info.response)
-            }
-        });
+    async sendEmail( payload : Object | any ) : Promise<boolean> {
+        
+        let success : boolean = false;
+        try{
+            const sentInfo = await this.getTransporter().sendMail( this.getMailOptions( payload ));
+            console.log( sentInfo );
+            success = true;
+        }catch( error ){
+            success = false;
+        }
+
+        return success;
     }
 
-    getFilePath(){
-        const file = path.join(__dirname, 'nepa.pdf');
-        return file;
-    }
+
 }
