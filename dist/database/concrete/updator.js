@@ -85,7 +85,6 @@ class Updator {
     ;
     updateSchoolData(payload) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log(payload);
             try {
                 yield this.getDefaultSchoolDataTable();
             }
@@ -94,7 +93,6 @@ class Updator {
             const keys = Object.keys(payload);
             for (let i = 0; i < keys.length; i++) {
                 const key = keys[i].toString();
-                console.log(payload[key]);
                 yield (yield this.getRepository().getSchoolDataDatabaseConnection()).run('UPDATE school SET Data = ? WHERE Id = ? ', payload[key], key);
             }
             return 1;

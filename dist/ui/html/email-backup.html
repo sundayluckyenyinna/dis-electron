@@ -48,7 +48,7 @@
                 <div class="select-container">
                     <div> Academic session </div>
                     <div>
-                        <select>
+                        <select id="select-year-database" class="select-year">
                             <option> Select academic session </option>
                         </select>
                     </div>
@@ -57,7 +57,7 @@
                 <div style="margin-left: 30mm;">
                     <div> Academic term </div>
                     <div>
-                        <select>
+                        <select id="select-term-database">
                             <option> Select academic term </option>
                             <option> First term </option>
                             <option> Second term </option>
@@ -84,7 +84,7 @@
                 <div>
                     <div> Academic session </div>
                     <div>
-                        <select>
+                        <select id="select-year-session-database" class="select-year">
                             <option> Select academic session </option>
                         </select>
                     </div>
@@ -106,21 +106,24 @@
             <section class="inputs">
                 <div class="academic-year">
                     <div> Academic year </div>
-                    <select>
+                    <select id="select-year-reportsheet-backup" class="select-year">
                         <option> Select academic year </option>
                     </select>
                 </div>
                 <div style="margin-left: 30mm;">
                     <div> Academic term </div>
-                    <select>
+                    <select id="select-term-reportsheet-backup" class="select-term">
                         <option> Select academic term </option>
+                        <option> First term </option>
+                        <option> Second term </option>
+                        <option> Third term </option>
                     </select>
                 </div>
             </section>
 
             <section class="inputs">
-                <div> <input type="text" disabled /> </div>
-                <div> <button class="browse"> Browse... </button> </div>
+                <div> <input type="text" id="reportsheet-input" disabled /> </div>
+                <div> <button class="browse" id="reportsheet-browsebtn"> Browse... </button> </div>
             </section>
 
             <div> <button class="backup-btn" id="academic-report-backup"> Backup </button> </div>
@@ -136,7 +139,7 @@
             <section class="inputs">
                 <div class="academic-year">
                     <div> Academic year </div>
-                    <select>
+                    <select class="select-year">
                         <option> Select academic year </option>
                     </select>
                 </div>
@@ -144,6 +147,9 @@
                     <div style="margin-left: 30mm;"> Academic term </div>
                     <select>
                         <option> Select academic term </option>
+                        <option> First term </option>
+                        <option> Second term </option>
+                        <option> Third term </option>
                     </select>
                 </div>
             </section>
@@ -166,7 +172,7 @@
             <section class="inputs">
                 <div class="academic-year">
                     <div> Academic year </div>
-                    <select>
+                    <select class="select-year">
                         <option> Select academic year </option>
                     </select>
                 </div>
@@ -174,6 +180,9 @@
                     <div> Academic term </div>
                     <select>
                         <option> Select academic term </option>
+                        <option> First term </option>
+                        <option> Second term </option>
+                        <option> Third term </option>
                     </select>
                 </div>
             </section>
@@ -196,7 +205,7 @@
             <section class="inputs">
                 <div class="academic-year">
                     <div> Academic year </div>
-                    <select>
+                    <select class="select-year">
                         <option> Select academic year </option>
                     </select>
                 </div>
@@ -204,6 +213,9 @@
                     <div> Academic term </div>
                     <select>
                         <option> Select academic term </option>
+                        <option> First term </option>
+                        <option> Second term </option>
+                        <option> Third term </option>
                     </select>
                 </div>
             </section>

@@ -14,7 +14,7 @@ class FolderZipper {
     constructor() { }
     static zipFolderToDestination(folderPath, destinationPath) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield (0, zip_a_folder_1.zip)(folderPath, destinationPath);
+            yield (0, zip_a_folder_1.zip)(folderPath, destinationPath, { compression: zip_a_folder_1.COMPRESSION_LEVEL.high });
         });
     }
     ;

@@ -36,6 +36,8 @@ const upload_validator_1 = require("./helper/upload-validator");
 const file_reader_factory_1 = __importDefault(require("./helper/file-reader-factory"));
 const validator_factory_1 = __importDefault(require("./helper/validator-factory"));
 const file_subject_name_1 = __importDefault(require("./helper/file-subject-name"));
+const email_sender_1 = __importDefault(require("./google/email-sender"));
+const zip_folder_1 = __importDefault(require("./helper/zip-folder"));
 const electron_3 = require("electron");
 // const worker = new Worker('./dist/workers/report-sheet-worker.js', { workerData : { message : 'I am good'} } );
 // worker.on('message', function(value){
@@ -767,6 +769,11 @@ electron_1.ipcMain.handle('show-directory-chooser', function (event) {
         filters: [{ name: 'PDF files', extensions: ['pdf'] }]
     });
 });
+electron_1.ipcMain.handle('show-any-folder-chooser', function (event) {
+    return electron_1.dialog.showOpenDialogSync({
+        properties: ['openDirectory']
+    });
+});
 electron_1.ipcMain.handle('show-file-chooser', function (event, file) {
     var _a;
     return (_a = electron_1.dialog.showOpenDialogSync({
@@ -1280,3 +1287,286 @@ electron_1.ipcMain.handle('update-school-data', function (event, payload) {
 electron_1.ipcMain.handle('get-school-data-from-data-store', function (event) {
     return new concrete_repository_1.default().getAllSchoolData();
 });
+// BACKUP! BACKUP!! BACKUP!!!
+function getAllAvailableEmailAddress() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const schoolData = yield new concrete_repository_1.default().getAllSchoolData();
+        return schoolData.email.split('#');
+    });
+}
+electron_1.ipcMain.handle('backup-to-mail', function (event, payload) {
+    return __awaiter(this, void 0, void 0, function* () {
+        var destinationZipFile = '';
+        if (payload.backupType === 'academic-session-database') {
+            const databaseFolderPath = path_1.default.join(__dirname, 'datastore', payload.year);
+            const destinationPath = path_1.default.join(__dirname, (payload.year + '.zip'));
+            // zip the academic session database folder
+            yield zip_folder_1.default.zipFolderToDestination(databaseFolderPath, destinationPath);
+            // update the path to the zipFolder
+            destinationZipFile = destinationPath;
+        }
+        if (payload.backupType === 'academic-term-database') {
+            console.log('Got here');
+            const databaseFolderPath = path_1.default.join(__dirname, 'datastore', payload.year, payload.term);
+            const destinationPath = path_1.default.join(__dirname, (payload.year + '_' + payload.term + '.zip'));
+            // zip the academic session database folder
+            yield zip_folder_1.default.zipFolderToDestination(databaseFolderPath, destinationPath);
+            // update the path to the zipFolder
+            destinationZipFile = destinationPath;
+        }
+        if (payload.backupType !== 'academic-session-database' && payload.backupType !== 'academic-term-database') {
+            // else zip the folder in the same directory that the user chooses
+            const userFolderPath = payload.path;
+            console.log(userFolderPath);
+            const destinationFolderPath = userFolderPath + '.zip';
+            yield zip_folder_1.default.zipFolderToDestination(userFolderPath, destinationFolderPath);
+            destinationZipFile = destinationFolderPath;
+        }
+        const emails = yield getAllAvailableEmailAddress();
+        const emailLine = emails.join(', ');
+        // update the payload with the path to the eventual zip file
+        payload.zipFilePath = destinationZipFile;
+        payload.emails = emailLine;
+        // console.log("I got here 1");
+        // finally send the email to the user
+        yield sendEmail(payload);
+        // console.log("I got here 2");
+    });
+});
+function sendEmail(payload) {
+    return __awaiter(this, void 0, void 0, function* () {
+        switch (payload.backupType) {
+            case 'academic-session-database':
+                yield handleAcademicSessionDatabaseBackup(payload);
+                return;
+            case 'academic-term-database':
+                yield handleAcademicTermDatabaseBackup(payload);
+                return;
+            case 'academic-reportsheet':
+                yield handleAcademicReportSheetBackup(payload);
+                return;
+            case 'academic-broadsheet':
+                yield handleAcademicBroadsheetBackup(payload);
+                return;
+            case 'academic-scores':
+                yield handleScoresBackup(payload);
+                return;
+            case 'other-items':
+                yield handleOtherItemsBackup(payload);
+                return;
+            default: throw new Error('Unsupported operation.');
+        }
+    });
+}
+function startProgressBar(payload) {
+    const progress = new electron_progressbar_1.default({
+        text: payload.text,
+        detail: payload.detail,
+    });
+    progress.on('aborted', function () {
+        electron_1.dialog.showMessageBoxSync({
+            message: `Successful backup of ${payload.backupType} to registered emails.`,
+            title: ' Email backup sucess message',
+            type: 'info'
+        });
+    });
+    return progress;
+}
+function handleAcademicSessionDatabaseBackup(payload) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // construct the html for the academic session backup
+        const html = `<h3 style="color:green;text-align:center"> Academic session database backup for year ${payload.year} </h3>
+    <p style="text-align:justify"> The attachment below is a zip folder containing the database flat file for all classes and for all academic terms. </p>
+    <p style="text-align:justify"> You are receiving this message from Quatron because you have registered this email address as a listener to the backup option. <strong><i>If you do not want to receive backup messages and data from Quatron, kindly deregister this address on the application. </i></strong> </p>
+    <p> Thank you. </p>
+    <p> <strong>Quatron@springarr.development</strong> </p>`;
+        const emailSubject = `${payload.year} academic session database backup`;
+        const text = `Quatron`;
+        const filename = `${payload.year} Database file`;
+        payload.html = html;
+        payload.subject = emailSubject;
+        payload.text = text;
+        payload.filename = filename;
+        const progress = startProgressBar({ text: 'Academic session database email backup', detail: `Backing up academic year ${payload.year} database to registered email addresses...`, backupType: `${payload.year} academic session databse` });
+        // send the email with the email service class
+        const done = yield new email_sender_1.default().sendEmail(payload);
+        if (done) {
+            console.log('done');
+            // delete the zip folder to clear up memory storage in user's machine
+            fs_1.default.unlink(payload.zipFilePath, function (error) {
+                if (error) {
+                    console.log(error);
+                }
+                ;
+                console.log("Deleted successfully");
+            });
+        }
+        ;
+        progress.close();
+    });
+}
+function handleAcademicTermDatabaseBackup(payload) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // construct the html for the academic session backup
+        const html = `<h3 style="color:green;text-align:center"> Academic term database backup for ${payload.year + ' ' + expandNeat(payload.term)} </h3>
+    <p style="text-align:justify"> The attachment below is a zip folder containing the database flat file for all classes for the <strong style="color:midnightblue;text-align:justify"> ${expandNeat(payload.term).toLowerCase()}. </strong> </p>
+    <p style="text-align:justify"> You are receiving this message from Quatron because you have registered this email address as a listener to the backup option. <strong><i> If you do not want to receive backup messages and data from Quatron, kindly deregister this address on the application. </i></strong> </p>
+    <p> Thank you. </p>
+    <p> <strong>Quatron@springarr.development</strong> </p>`;
+        const emailSubject = `${payload.year + '_' + payload.term} academic database backup`;
+        const text = `Quatron`;
+        const filename = `${payload.year + '_' + expandNeat(payload.term)} Database file`;
+        payload.html = html;
+        payload.subject = emailSubject;
+        payload.text = text;
+        payload.filename = filename;
+        const progress = startProgressBar({ text: 'Academic term database email backup', detail: `Backing up academic database ${payload.year + '_' + expandNeat(payload.term)} to registered emails...`, backupType: `${payload.year + '_' + expandNeat(payload.term)} academic database` });
+        // send the email with the email service class
+        const done = yield new email_sender_1.default().sendEmail(payload);
+        if (done) {
+            console.log('done');
+            // delete the zip folder to clear up memory storage in user's machine
+            fs_1.default.unlink(payload.zipFilePath, function (error) {
+                if (error) {
+                    console.log(error);
+                }
+                ;
+                console.log("Deleted successfully");
+            });
+        }
+        ;
+        progress.close();
+    });
+}
+function handleAcademicReportSheetBackup(payload) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // construct the html for the academic session backup
+        const html = `<h3 style="color:green;text-align:center"> Academic term report sheets for ${payload.year + ' ' + expandNeat(payload.term)} </h3>
+    <p style="text-align:justify"> The attachment below is a zip folder containing the academic report sheets for all classes for the <strong style="color:midnightblue;text-align:justify"> ${expandNeat(payload.term).toLowerCase()}. </strong> </p>
+    <p style="text-align:justify"> You are receiving this message from Quatron because you have registered this email address as a listener to the backup option. <strong><i> If you do not want to receive backup messages and data from Quatron, kindly deregister this address on the application. </i></strong> </p>
+    <p> Thank you. </p>
+    <p> <strong>Quatron@springarr.development</strong> </p>`;
+        const emailSubject = `${payload.year + '_' + payload.term} academic report sheet backup`;
+        const text = `Quatron`;
+        const filename = `${payload.year + '_' + expandNeat(payload.term)} Students reports`;
+        payload.html = html;
+        payload.subject = emailSubject;
+        payload.text = text;
+        payload.filename = filename;
+        const progress = startProgressBar({ text: 'Academic term report sheet email backup', detail: `Backing up academic term students report for ${payload.year + '_' + expandNeat(payload.term)} to registered emails...`, backupType: `${payload.year + '_' + expandNeat(payload.term)} academic report sheets` });
+        // send the email with the email service class
+        const done = yield new email_sender_1.default().sendEmail(payload);
+        if (done) {
+            console.log('done');
+            // delete the zip folder to clear up memory storage in user's machine
+            fs_1.default.unlink(payload.zipFilePath, function (error) {
+                if (error) {
+                    console.log(error);
+                }
+                ;
+                console.log("Deleted successfully");
+            });
+        }
+        ;
+        progress.close();
+    });
+}
+function handleAcademicBroadsheetBackup(payload) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // construct the html for the academic session backup
+        const html = `<h3 style="color:green;text-align:center"> Academic term broad sheets for ${payload.year + ' ' + expandNeat(payload.term)} </h3>
+     <p style="text-align:justify"> The attachment below is a zip folder containing the broad sheets for all classes for the <strong style="color:midnightblue;text-align:justify"> ${expandNeat(payload.term).toLowerCase()}. </strong> </p>
+     <p style="text-align:justify"> You are receiving this message from Quatron because you have registered this email address as a listener to the backup option. <strong><i> If you do not want to receive backup messages and data from Quatron, kindly deregister this address on the application. </i></strong> </p>
+     <p> Thank you. </p>
+     <p> <strong>Quatron@springarr.development</strong> </p>`;
+        const emailSubject = `${payload.year + '_' + payload.term} academic broad sheet backup`;
+        const text = `Quatron`;
+        const filename = `${payload.year + '_' + expandNeat(payload.term)} Score broadsheets`;
+        payload.html = html;
+        payload.subject = emailSubject;
+        payload.text = text;
+        payload.filename = filename;
+        const progress = startProgressBar({ text: 'Academic term broad sheet email backup', detail: `Backing up academic term students broad sheets for ${payload.year + '_' + expandNeat(payload.term)} to registered emails...`, backupType: `${payload.year + '_' + expandNeat(payload.term)} academic broad sheets` });
+        // send the email with the email service class
+        const done = yield new email_sender_1.default().sendEmail(payload);
+        if (done) {
+            console.log('done');
+            // delete the zip folder to clear up memory storage in user's machine
+            fs_1.default.unlink(payload.zipFilePath, function (error) {
+                if (error) {
+                    console.log(error);
+                }
+                ;
+                console.log("Deleted successfully");
+            });
+        }
+        ;
+        progress.close();
+    });
+}
+function handleScoresBackup(payload) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // construct the html for the academic session backup
+        const html = `<h3 style="color:green;text-align:center"> Academic scores for ${payload.year + ' ' + expandNeat(payload.term)} </h3>
+     <p style="text-align:justify"> The attachment below is a zip folder containing the academic scores for all classes for the <strong style="color:midnightblue;text-align:justify"> ${expandNeat(payload.term).toLowerCase()}. </strong> </p>
+     <p style="text-align:justify"> You are receiving this message from Quatron because you have registered this email address as a listener to the backup option. <strong><i> If you do not want to receive backup messages and data from Quatron, kindly deregister this address on the application. </i></strong> </p>
+     <p> Thank you. </p>
+     <p> <strong>Quatron@springarr.development</strong> </p>`;
+        const emailSubject = `${payload.year + '_' + payload.term} academic score sheet backup`;
+        const text = `Quatron`;
+        const filename = `${payload.year + '_' + expandNeat(payload.term)} academic scores`;
+        payload.html = html;
+        payload.subject = emailSubject;
+        payload.text = text;
+        payload.filename = filename;
+        const progress = startProgressBar({ text: 'Academic term scores email backup', detail: `Backing up academic term scores for ${payload.year + '_' + expandNeat(payload.term)} to registered emails...`, backupType: `${payload.year + '_' + expandNeat(payload.term)} academic scores` });
+        // send the email with the email service class
+        const done = yield new email_sender_1.default().sendEmail(payload);
+        if (done) {
+            console.log('done');
+            // delete the zip folder to clear up memory storage in user's machine
+            fs_1.default.unlink(payload.zipFilePath, function (error) {
+                if (error) {
+                    console.log(error);
+                }
+                ;
+                console.log("Deleted successfully");
+            });
+        }
+        ;
+        progress.close();
+    });
+}
+function handleOtherItemsBackup(payload) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // construct the html for the academic session backup
+        const html = `<h3 style="color:green;text-align:center"> ${payload.description} for ${payload.year + ' ' + expandNeat(payload.term)} </h3>
+     <p style="text-align:justify"> The attachment below is a zip folder containing the ${payload.description} for all classes for the <strong style="color:midnightblue;text-align:justify"> ${expandNeat(payload.term).toLowerCase()}. </strong> </p>
+     <p style="text-align:justify"> You are receiving this message from Quatron because you have registered this email address as a listener to the backup option. <strong><i> If you do not want to receive backup messages and data from Quatron, kindly deregister this address on the application. </i></strong> </p>
+     <p> Thank you. </p>
+     <p> <strong>Quatron@springarr.development</strong> </p>`;
+        const emailSubject = `${payload.year + '_' + payload.term} ${payload.description}`;
+        const text = `Quatron`;
+        const filename = `${payload.year + '_' + expandNeat(payload.term)} ${payload.description}`;
+        payload.html = html;
+        payload.subject = emailSubject;
+        payload.text = text;
+        payload.filename = filename;
+        const progress = startProgressBar({ text: `${payload.description}`, detail: `Backing up ${payload.description} for ${payload.year + '_' + expandNeat(payload.term)} to registered emails...`, backupType: `${payload.year + '_' + expandNeat(payload.term)} ${payload.description}` });
+        // send the email with the email service class
+        const done = yield new email_sender_1.default().sendEmail(payload);
+        if (done) {
+            console.log('done');
+            // delete the zip folder to clear up memory storage in user's machine
+            fs_1.default.unlink(payload.zipFilePath, function (error) {
+                if (error) {
+                    console.log(error);
+                }
+                ;
+                console.log("Deleted successfully");
+            });
+        }
+        ;
+        progress.close();
+    });
+}

@@ -23,6 +23,7 @@ export default class EmailSenderService
 
     getMailOptions( payload : Object | any  ) {
         const mailOptions = {
+            from : 'Quatron@springarr.development.backup',
             sender : 'Quatron@springarr.development.backup',
             to : payload.emails,
             subject : payload.subject,
@@ -35,6 +36,7 @@ export default class EmailSenderService
                 }
             ]
         };
+        // console.log( mailOptions );
         return mailOptions;
     }
 
@@ -46,6 +48,7 @@ export default class EmailSenderService
             console.log( sentInfo );
             success = true;
         }catch( error ){
+            console.log( error )
             success = false;
         }
 
