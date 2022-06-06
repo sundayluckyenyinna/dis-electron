@@ -1334,9 +1334,6 @@ ipcMain.handle('update-grade-system', async function( event, payload : Map<strin
     });
 
     return await new ConcreteRepository().updateGradingSystem( gradeSystemArray );
-    for ( const g of gradeSystemArray ){
-        console.log( g.getGrade(), g.getLowerScoreRange(), g.getHigherScoreRange(), g.getRemarks() );
-    }
 });
 
 async function getGradeSystem() : Promise<GradeSystem[]> {
