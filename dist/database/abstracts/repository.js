@@ -28,6 +28,11 @@ class Repository {
             return yield this.getStaticDatabaseConnection('school');
         });
     }
+    getGradeSystemDatabaseConnection() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.getStaticDatabaseConnection('grade_system');
+        });
+    }
     getPassportDatabaseConnection(data) {
         return __awaiter(this, void 0, void 0, function* () {
             // return await this.getStaticDatabaseConnection('passport');

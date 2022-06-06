@@ -165,7 +165,7 @@ $('#academic-report-backup').on('click', async function( event ){
     await ipcRenderer.invoke('backup-to-mail', getAcademicReportBackupData());
 });
 
-$('#backup-broadsheet').on('click', async function( even ){
+$('#backup-broadsheet').on('click', async function( event ){
     //TODO
     await ipcRenderer.invoke('backup-to-mail', getAcademicBroadsheetBackupData());
 });

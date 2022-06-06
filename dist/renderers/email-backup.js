@@ -157,7 +157,7 @@ $('#academic-report-backup').on('click', function (event) {
         yield electron_1.ipcRenderer.invoke('backup-to-mail', getAcademicReportBackupData());
     });
 });
-$('#backup-broadsheet').on('click', function (even) {
+$('#backup-broadsheet').on('click', function (event) {
     return __awaiter(this, void 0, void 0, function* () {
         //TODO
         yield electron_1.ipcRenderer.invoke('backup-to-mail', getAcademicBroadsheetBackupData());

@@ -144,6 +144,13 @@ export default class Creator
         }
     }
 
+    async createGradeSystemTable() {
+        await (await this.getRepository().getGradeSystemDatabaseConnection()).exec(
+            'CREATE TABLE IF NOT EXISTS grade_system (Grade varchar(10) primary key, Lower_Score_Range Integer, Higher_Score_Range Integer, Remarks varchar(30))'
+        );
+
+    }
+
     getRepository() {
         return this.repository;
     };

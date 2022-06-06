@@ -1,5 +1,6 @@
 import Repository from '../abstracts/repository';
 import Subject from '../../model/subject';
+import GradeSystem from '../../model/grade-settings';
 
 export default class Reader 
 {
@@ -84,7 +85,9 @@ export default class Reader
             const subject = subjects[i];
             const scoreObject = await (await this.getRepository().getClassDatabaseConnection(payload)).get('SELECT * FROM ' + subject + ' WHERE Student_No = ?', studentNo );
             // create a SubjectObject to get Total_Score, Grade and Remarks
-            const subjectDTO = new Subject().setCaScore(scoreObject.Ca_Score)
+            const subjectDTO = new Subject()
+                                            .setGradeSystemArray( await this.getGradingSystem() )
+                                            .setCaScore(scoreObject.Ca_Score)
                                             .setExamScore(scoreObject.Exam_Score);
 
             scoreObject.subjectName = this.getNeatSubject( subject );
@@ -256,6 +259,22 @@ export default class Reader
         });
 
         return schoolData;
+    }
+
+    async getGradingSystem() : Promise<GradeSystem[]> {
+        
+        const gradeSystemArray : GradeSystem[] = [];
+
+        const gradeObjects : [{ Grade : string, Lower_Score_Range : number, Higher_Score_Range : number, Remarks : string }] = await (await this.getRepository().getGradeSystemDatabaseConnection()).all(
+            'SELECT * FROM grade_system'
+        );
+        
+        for (const gradeObject of gradeObjects ){
+            const gradeSystem = new GradeSystem( gradeObject.Grade, gradeObject.Lower_Score_Range, gradeObject.Higher_Score_Range, gradeObject.Remarks);
+            gradeSystemArray.push( gradeSystem );
+        }
+
+        return gradeSystemArray;
     }
 
     // defaults

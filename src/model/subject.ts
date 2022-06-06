@@ -1,4 +1,5 @@
 import Grade from './grade';
+import GradeSystem from './grade-settings';
 
 /**
  *  Defines the properties and behaviour of a Subject object.
@@ -15,6 +16,8 @@ export default class Subject
     private examScore : number = 0;
 
     private level : string = '';
+
+    private gradeSystemArray!: GradeSystem[];
 
     /** */
     constructor(){
@@ -45,6 +48,10 @@ export default class Subject
         return this.examScore;
     };
 
+    getGradeSystemArray() : GradeSystem[] { 
+        return this.gradeSystemArray;
+    }
+
     /**
      * Returns the TotalScore associated to this Subject object.
      * @returns totalScore : number
@@ -58,7 +65,7 @@ export default class Subject
      * @returns grade : string
      */
     getGrade() : string {
-        return Grade.getGradeFromTotal( this.getTotalScore() );
+        return new Grade( this.getGradeSystemArray() ).getGradeFromTotal( this.getTotalScore() );
     };
 
     getLevel() : string {
@@ -66,7 +73,7 @@ export default class Subject
     };
 
     getRemarks() : string {
-        return Grade.getRemarks( this.getGrade() );
+        return new Grade( this.getGradeSystemArray() ).getRemarks( this.getGrade() );
     };
 
     setName( name : string ) : Subject {
@@ -89,4 +96,8 @@ export default class Subject
         return this;
     };
 
+    setGradeSystemArray ( gradeSystemArray : GradeSystem[] ) : Subject {
+        this.gradeSystemArray = gradeSystemArray;
+        return this;
+    }
 };

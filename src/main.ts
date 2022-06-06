@@ -26,6 +26,7 @@ import nodemailer from 'nodemailer';
 import EmailSenderService from './google/email-sender';
 import FolderZipper from './helper/zip-folder';
 import { session } from 'electron';
+import GradeSystem from './model/grade-settings';
 
 // const worker = new Worker('./dist/workers/report-sheet-worker.js', { workerData : { message : 'I am good'} } );
 // worker.on('message', function(value){
@@ -1324,8 +1325,27 @@ async function getAllAvailableEmailAddress() : Promise<string[]> {
      return ( schoolData.email as string ).split('#');
 }
 
+ipcMain.handle('update-grade-system', async function( event, payload : Map<string, Object> ){
+    // the payload is a map with key as grade and with object as the value
+    const gradeSystemArray : GradeSystem[] = [];
+
+    payload.forEach((value : Object | any , key : string) => {
+        gradeSystemArray.push( new GradeSystem( key, value.lowerScoreRange, value.higherScoreRange, value.remarks ) );
+    });
+
+    return await new ConcreteRepository().updateGradingSystem( gradeSystemArray );
+    for ( const g of gradeSystemArray ){
+        console.log( g.getGrade(), g.getLowerScoreRange(), g.getHigherScoreRange(), g.getRemarks() );
+    }
+});
+
+async function getGradeSystem() : Promise<GradeSystem[]> {
+    return await new ConcreteRepository().getGradingSystem();
+}
 
 ipcMain.handle('backup-to-mail', async function( event, payload ){
+
+    console.log( payload );
 
     var destinationZipFile : string = '';
 

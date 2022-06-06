@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const subject_1 = __importDefault(require("../../model/subject"));
+const grade_settings_1 = __importDefault(require("../../model/grade-settings"));
 class Reader {
     constructor(repository) {
         this.respository = repository;
@@ -101,7 +102,9 @@ class Reader {
                 const subject = subjects[i];
                 const scoreObject = yield (yield this.getRepository().getClassDatabaseConnection(payload)).get('SELECT * FROM ' + subject + ' WHERE Student_No = ?', studentNo);
                 // create a SubjectObject to get Total_Score, Grade and Remarks
-                const subjectDTO = new subject_1.default().setCaScore(scoreObject.Ca_Score)
+                const subjectDTO = new subject_1.default()
+                    .setGradeSystemArray(yield this.getGradingSystem())
+                    .setCaScore(scoreObject.Ca_Score)
                     .setExamScore(scoreObject.Exam_Score);
                 scoreObject.subjectName = this.getNeatSubject(subject);
                 scoreObject.Total_Score = subjectDTO.getTotalScore();
@@ -254,6 +257,17 @@ class Reader {
                 schoolData[idValue] = dataValue;
             });
             return schoolData;
+        });
+    }
+    getGradingSystem() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const gradeSystemArray = [];
+            const gradeObjects = yield (yield this.getRepository().getGradeSystemDatabaseConnection()).all('SELECT * FROM grade_system');
+            for (const gradeObject of gradeObjects) {
+                const gradeSystem = new grade_settings_1.default(gradeObject.Grade, gradeObject.Lower_Score_Range, gradeObject.Higher_Score_Range, gradeObject.Remarks);
+                gradeSystemArray.push(gradeSystem);
+            }
+            return gradeSystemArray;
         });
     }
     // defaults

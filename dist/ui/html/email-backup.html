@@ -139,13 +139,13 @@
             <section class="inputs">
                 <div class="academic-year">
                     <div> Academic year </div>
-                    <select class="select-year">
+                    <select class="select-year" id="select-year-broadsheet-backup">
                         <option> Select academic year </option>
                     </select>
                 </div>
                 <div>
                     <div style="margin-left: 30mm;"> Academic term </div>
-                    <select>
+                    <select id="select-term-broadsheet-backup">
                         <option> Select academic term </option>
                         <option> First term </option>
                         <option> Second term </option>
@@ -155,14 +155,14 @@
             </section>
 
             <section class="inputs">
-                <div> <input type="text" disabled /> </div>
+                <div> <input type="text" disabled id="broadsheet-input" /> </div>
                 <div> <button class="browse"> Browse... </button> </div>
             </section>
 
             <div> <button class="backup-btn" id="backup-broadsheet"> Backup </button> </div>
         </div>
 
-        <!-- Backup report sheets -->
+        <!-- Backup scores -->
         <div class="scores">
             <div class="backup-header"> Backup scores </div>
             <section class="backup-text">
@@ -172,13 +172,13 @@
             <section class="inputs">
                 <div class="academic-year">
                     <div> Academic year </div>
-                    <select class="select-year">
+                    <select class="select-year" id="broadsheet-input">
                         <option> Select academic year </option>
                     </select>
                 </div>
                 <div style="margin-left: 30mm;">
                     <div> Academic term </div>
-                    <select>
+                    <select id="select-term-score-backup">
                         <option> Select academic term </option>
                         <option> First term </option>
                         <option> Second term </option>
@@ -188,7 +188,7 @@
             </section>
 
             <section class="inputs">
-                <div> <input type="text" disabled /> </div>
+                <div> <input type="text" disabled id="scores-input" /> </div>
                 <div> <button class="browse"> Browse... </button> </div>
             </section>
 
@@ -205,13 +205,13 @@
             <section class="inputs">
                 <div class="academic-year">
                     <div> Academic year </div>
-                    <select class="select-year">
+                    <select class="select-year" id="select-year-other-backup">
                         <option> Select academic year </option>
                     </select>
                 </div>
                 <div style="margin-left: 30mm;">
                     <div> Academic term </div>
-                    <select>
+                    <select id="select-term-other-backup">
                         <option> Select academic term </option>
                         <option> First term </option>
                         <option> Second term </option>
@@ -221,7 +221,8 @@
             </section>
 
             <section class="inputs">
-                <div> <input type="text" disabled /> </div>
+                <div> <input type="text" disabled id="other-desc" placeholder="Enter a description for this item" /> </div>
+                <div> <input type="text" disabled id="other-input" /> </div>
                 <div> <button class="browse"> Browse... </button> </div>
             </section>
 

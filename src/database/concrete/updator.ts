@@ -1,6 +1,7 @@
 import Repository from '../abstracts/repository';
 import sqlite3 from 'sqlite3';
 import ConcreteRepository from './concrete-repository';
+import GradeSystem from '../../model/grade-settings';
 
 export default class Updator 
 {
@@ -94,6 +95,36 @@ export default class Updator
         }
 
         return 1;
+    }
+
+    async updateGradingSystem( gradeSystemArray : GradeSystem[] ){
+        // first ensure there is  a table to update
+        await this.getDefaultGradeSystemTable();
+        // try to delete all there is in the table before and update with the new grade system.
+        try{
+               await (await this.getRepository().getGradeSystemDatabaseConnection()).run(
+                'DELETE FROM grade_system'
+            );
+            await this.insertIntoGradeSystemTable( gradeSystemArray );
+            
+        }catch ( error ){
+            // if there is nothing to delete. then just insert straightaway.
+            await this.insertIntoGradeSystemTable( gradeSystemArray );
+        }
+    }
+
+    private async insertIntoGradeSystemTable( gradeSystemArray : GradeSystem[] ){
+
+        for ( let i = 0; i < gradeSystemArray.length; i ++ ){
+            const gradeSystem = gradeSystemArray[i];
+            await (await this.getRepository().getGradeSystemDatabaseConnection()).run(
+                "INSERT INTO grade_system VALUES(?,?,?,?)", gradeSystem.getGrade(), gradeSystem.getLowerScoreRange(), gradeSystem.getHigherScoreRange(), gradeSystem.getRemarks()
+            );
+        }
+    }
+
+    private async getDefaultGradeSystemTable() {
+        await ( this.getRepository() as ConcreteRepository ).getCreator().createGradeSystemTable();
     }
 
     private async getDefaultSchoolDataTable() {

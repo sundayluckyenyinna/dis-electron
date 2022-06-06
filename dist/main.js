@@ -39,6 +39,7 @@ const file_subject_name_1 = __importDefault(require("./helper/file-subject-name"
 const email_sender_1 = __importDefault(require("./google/email-sender"));
 const zip_folder_1 = __importDefault(require("./helper/zip-folder"));
 const electron_3 = require("electron");
+const grade_settings_1 = __importDefault(require("./model/grade-settings"));
 // const worker = new Worker('./dist/workers/report-sheet-worker.js', { workerData : { message : 'I am good'} } );
 // worker.on('message', function(value){
 //     console.log( value );
@@ -1294,8 +1295,27 @@ function getAllAvailableEmailAddress() {
         return schoolData.email.split('#');
     });
 }
+electron_1.ipcMain.handle('update-grade-system', function (event, payload) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // the payload is a map with key as grade and with object as the value
+        const gradeSystemArray = [];
+        payload.forEach((value, key) => {
+            gradeSystemArray.push(new grade_settings_1.default(key, value.lowerScoreRange, value.higherScoreRange, value.remarks));
+        });
+        return yield new concrete_repository_1.default().updateGradingSystem(gradeSystemArray);
+        for (const g of gradeSystemArray) {
+            console.log(g.getGrade(), g.getLowerScoreRange(), g.getHigherScoreRange(), g.getRemarks());
+        }
+    });
+});
+function getGradeSystem() {
+    return __awaiter(this, void 0, void 0, function* () {
+        return yield new concrete_repository_1.default().getGradingSystem();
+    });
+}
 electron_1.ipcMain.handle('backup-to-mail', function (event, payload) {
     return __awaiter(this, void 0, void 0, function* () {
+        console.log(payload);
         var destinationZipFile = '';
         if (payload.backupType === 'academic-session-database') {
             const databaseFolderPath = path_1.default.join(__dirname, 'datastore', payload.year);

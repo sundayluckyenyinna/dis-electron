@@ -256,25 +256,26 @@ $('#add-grade').on('click', function( event ){
 
 });
 
-$('#grade-save').on('click', function( this, event ){
+$('#grade-save').on('click', async function( this, event ){
     const gradeMap : Map<string, Object> = new Map();
 
     $('.grade-row').each(function(this, index, element){
         const grade : string = $( this).find('.g').find('input').val()?.toString().trim() as string ;
         const lowerScore = $( this).find('.ls').find('input').val()?.toString().trim();
         const higherScore = $( this).find('.hs').find('input').val()?.toString().trim();
-        const remark = $( this).find('.r').find('input').val()?.toString().trim();
+        const remarks = $( this).find('.r').find('input').val()?.toString().trim();
+
         const payload : Object = {
             grade : grade,
-            lowerScoreRange : lowerScore,
-            higherScoreRange : higherScore,
-            remark : remark
+            lowerScoreRange : Number(lowerScore),
+            higherScoreRange : Number(higherScore),
+            remarks : remarks
         };
 
         gradeMap.set( grade , payload );
     });
 
-    console.log( gradeMap );
+    await ipcRenderer.invoke('update-grade-system', gradeMap);
 });
 
 

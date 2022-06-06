@@ -7,6 +7,7 @@ import Subject from '../../model/subject';
 import Reader from './reader';
 import Updator from './updator';
 import Deletor from './deletor';
+import GradeSystem from '../../model/grade-settings';
 
 export default class ConcreteRepository extends Repository
 {
@@ -123,6 +124,10 @@ export default class ConcreteRepository extends Repository
         return this.getReader().getAllSchoolData();
     }
 
+    async getGradingSystem() : Promise<GradeSystem[]>{
+        return await this.getReader().getGradingSystem();
+    }
+
     async updateStudentScoresForYearTermClass( scores : Object[], payload : Object ) : Promise<boolean> {
         return await this.getUpdator().updateStudentScoresForYearTermClass( scores, payload);
     };
@@ -136,7 +141,11 @@ export default class ConcreteRepository extends Repository
     };
 
     async updateSchoolData( payload : Object | any ) : Promise<number> {
-        return this.getUpdator().updateSchoolData( payload );
+        return await this.getUpdator().updateSchoolData( payload );
+    }
+
+    async updateGradingSystem ( gradeSystemArray : GradeSystem[] ){
+        return await this.getUpdator().updateGradingSystem( gradeSystemArray );
     }
 
     deleteStudentByStudentNo(studentNo: string): Promise<void> {

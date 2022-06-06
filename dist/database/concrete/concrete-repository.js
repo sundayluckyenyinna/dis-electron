@@ -157,6 +157,11 @@ class ConcreteRepository extends repository_1.default {
             return this.getReader().getAllSchoolData();
         });
     }
+    getGradingSystem() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.getReader().getGradingSystem();
+        });
+    }
     updateStudentScoresForYearTermClass(scores, payload) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.getUpdator().updateStudentScoresForYearTermClass(scores, payload);
@@ -177,7 +182,12 @@ class ConcreteRepository extends repository_1.default {
     ;
     updateSchoolData(payload) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.getUpdator().updateSchoolData(payload);
+            return yield this.getUpdator().updateSchoolData(payload);
+        });
+    }
+    updateGradingSystem(gradeSystemArray) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.getUpdator().updateGradingSystem(gradeSystemArray);
         });
     }
     deleteStudentByStudentNo(studentNo) {

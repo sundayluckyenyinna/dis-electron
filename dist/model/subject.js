@@ -43,6 +43,9 @@ class Subject {
         return this.examScore;
     }
     ;
+    getGradeSystemArray() {
+        return this.gradeSystemArray;
+    }
     /**
      * Returns the TotalScore associated to this Subject object.
      * @returns totalScore : number
@@ -56,7 +59,7 @@ class Subject {
      * @returns grade : string
      */
     getGrade() {
-        return grade_1.default.getGradeFromTotal(this.getTotalScore());
+        return new grade_1.default(this.getGradeSystemArray()).getGradeFromTotal(this.getTotalScore());
     }
     ;
     getLevel() {
@@ -64,7 +67,7 @@ class Subject {
     }
     ;
     getRemarks() {
-        return grade_1.default.getRemarks(this.getGrade());
+        return new grade_1.default(this.getGradeSystemArray()).getRemarks(this.getGrade());
     }
     ;
     setName(name) {
@@ -87,6 +90,10 @@ class Subject {
         return this;
     }
     ;
+    setGradeSystemArray(gradeSystemArray) {
+        this.gradeSystemArray = gradeSystemArray;
+        return this;
+    }
 }
 exports.default = Subject;
 ;

@@ -243,22 +243,24 @@ $('#add-grade').on('click', function (event) {
     $('#grade-table').append(row);
 });
 $('#grade-save').on('click', function (event) {
-    const gradeMap = new Map();
-    $('.grade-row').each(function (index, element) {
-        var _a, _b, _c, _d;
-        const grade = (_a = $(this).find('.g').find('input').val()) === null || _a === void 0 ? void 0 : _a.toString().trim();
-        const lowerScore = (_b = $(this).find('.ls').find('input').val()) === null || _b === void 0 ? void 0 : _b.toString().trim();
-        const higherScore = (_c = $(this).find('.hs').find('input').val()) === null || _c === void 0 ? void 0 : _c.toString().trim();
-        const remark = (_d = $(this).find('.r').find('input').val()) === null || _d === void 0 ? void 0 : _d.toString().trim();
-        const payload = {
-            grade: grade,
-            lowerScoreRange: lowerScore,
-            higherScoreRange: higherScore,
-            remark: remark
-        };
-        gradeMap.set(grade, payload);
+    return __awaiter(this, void 0, void 0, function* () {
+        const gradeMap = new Map();
+        $('.grade-row').each(function (index, element) {
+            var _a, _b, _c, _d;
+            const grade = (_a = $(this).find('.g').find('input').val()) === null || _a === void 0 ? void 0 : _a.toString().trim();
+            const lowerScore = (_b = $(this).find('.ls').find('input').val()) === null || _b === void 0 ? void 0 : _b.toString().trim();
+            const higherScore = (_c = $(this).find('.hs').find('input').val()) === null || _c === void 0 ? void 0 : _c.toString().trim();
+            const remarks = (_d = $(this).find('.r').find('input').val()) === null || _d === void 0 ? void 0 : _d.toString().trim();
+            const payload = {
+                grade: grade,
+                lowerScoreRange: Number(lowerScore),
+                higherScoreRange: Number(higherScore),
+                remarks: remarks
+            };
+            gradeMap.set(grade, payload);
+        });
+        yield electron_1.ipcRenderer.invoke('update-grade-system', gradeMap);
     });
-    console.log(gradeMap);
 });
 // by default, all inputs should be disabled from editing, until the edit button is clicked
 $('input').attr('disabled', 'true');

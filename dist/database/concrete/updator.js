@@ -98,6 +98,34 @@ class Updator {
             return 1;
         });
     }
+    updateGradingSystem(gradeSystemArray) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // first ensure there is  a table to update
+            yield this.getDefaultGradeSystemTable();
+            // try to delete all there is in the table before and update with the new grade system.
+            try {
+                yield (yield this.getRepository().getGradeSystemDatabaseConnection()).run('DELETE FROM grade_system');
+                yield this.insertIntoGradeSystemTable(gradeSystemArray);
+            }
+            catch (error) {
+                // if there is nothing to delete. then just insert straightaway.
+                yield this.insertIntoGradeSystemTable(gradeSystemArray);
+            }
+        });
+    }
+    insertIntoGradeSystemTable(gradeSystemArray) {
+        return __awaiter(this, void 0, void 0, function* () {
+            for (let i = 0; i < gradeSystemArray.length; i++) {
+                const gradeSystem = gradeSystemArray[i];
+                yield (yield this.getRepository().getGradeSystemDatabaseConnection()).run("INSERT INTO grade_system VALUES(?,?,?,?)", gradeSystem.getGrade(), gradeSystem.getLowerScoreRange(), gradeSystem.getHigherScoreRange(), gradeSystem.getRemarks());
+            }
+        });
+    }
+    getDefaultGradeSystemTable() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.getRepository().getCreator().createGradeSystemTable();
+        });
+    }
     getDefaultSchoolDataTable() {
         return __awaiter(this, void 0, void 0, function* () {
             yield (yield this.getRepository()).getCreator().createSchoolDataTable();

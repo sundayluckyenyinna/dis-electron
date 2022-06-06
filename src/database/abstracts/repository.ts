@@ -25,6 +25,10 @@ export default abstract class Repository implements Create, Read, Update, Delete
         return await this.getStaticDatabaseConnection( 'school' );
     }
 
+    async getGradeSystemDatabaseConnection() {
+        return await this.getStaticDatabaseConnection('grade_system');
+    }
+
     async getPassportDatabaseConnection( data : Object | any ) {
         // return await this.getStaticDatabaseConnection('passport');
         const databaseInnerFolderPath = path.join( this.getDataStoreRootDir(), data.year, data.term );
