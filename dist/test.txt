@@ -1,3 +1,9 @@
+BUSINESS RULES
+=> The comments for the good behaviour behaviourmust be prefixed by the "@Good" prefix.
+
+=> The cojmment for the bad behaviour must be prefixed with the "@Bad" prefix.
+
+
 @comment
 This is the first line. This is the first line. This is the first line. This is the first line. This is the first line. This is the first line. This is the first line. This is the first line. This is the first line. This is the first line. This is the first line. This is the first line. This is the first line. This is the first line. This is the first line. This is the first line. This is the first line.
 

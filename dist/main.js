@@ -40,6 +40,8 @@ const email_sender_1 = __importDefault(require("./google/email-sender"));
 const zip_folder_1 = __importDefault(require("./helper/zip-folder"));
 const electron_3 = require("electron");
 const grade_settings_1 = __importDefault(require("./model/grade-settings"));
+const teacher_comment_1 = __importDefault(require("./helper/teacher-comment"));
+const comment_type_1 = require("./helper/comment-type");
 // const worker = new Worker('./dist/workers/report-sheet-worker.js', { workerData : { message : 'I am good'} } );
 // worker.on('message', function(value){
 //     console.log( value );
@@ -1518,12 +1520,11 @@ function handleAcademicBroadsheetBackup(payload) {
             });
         }
         ;
-        progress.close();
     });
 }
 function handleScoresBackup(payload) {
     return __awaiter(this, void 0, void 0, function* () {
-        // construct the html for the academic session backup
+        // construct the html for the academic session backup             
         const html = `<h3 style="color:green;text-align:center"> Academic scores for ${payload.year + ' ' + expandNeat(payload.term)} </h3>
      <p style="text-align:justify"> The attachment below is a zip folder containing the academic scores for all classes for the <strong style="color:midnightblue;text-align:justify"> ${expandNeat(payload.term).toLowerCase()}. </strong> </p>
      <p style="text-align:justify"> You are receiving this message from Quatron because you have registered this email address as a listener to the backup option. <strong><i> If you do not want to receive backup messages and data from Quatron, kindly deregister this address on the application. </i></strong> </p>
@@ -1587,19 +1588,6 @@ function handleOtherItemsBackup(payload) {
         progress.close();
     });
 }
-fs_1.default.readFile(path_1.default.join(__dirname, 'test.txt'), { encoding: 'utf-8' }, function (error, data) {
-    if (error) {
-        console.log(error);
-        return;
-    }
-    const array = data.split('@comment').map((token) => {
-        let word = '';
-        for (let i = 0; i < token.length; i++) {
-            if (token.charAt(i) !== '\r' && token.charAt(i) !== '\n') {
-                word += token.charAt(i);
-            }
-        }
-        return word.trim();
-    }).filter((token) => token !== '');
-    console.log(array);
-});
+// console.log( new TeacherComment().loa )
+new teacher_comment_1.default().loadComments(comment_type_1.CommentType.Teacher_Good_Behaviour, { includeDefault: false })
+    .then((data) => console.log(data));

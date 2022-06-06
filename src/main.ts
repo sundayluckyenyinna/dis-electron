@@ -27,6 +27,9 @@ import EmailSenderService from './google/email-sender';
 import FolderZipper from './helper/zip-folder';
 import { session } from 'electron';
 import GradeSystem from './model/grade-settings';
+import Comment from './helper/comment';
+import TeacherComment from './helper/teacher-comment';
+import { CommentType } from './helper/comment-type';
 
 // const worker = new Worker('./dist/workers/report-sheet-worker.js', { workerData : { message : 'I am good'} } );
 // worker.on('message', function(value){
@@ -1535,8 +1538,7 @@ async function handleAcademicBroadsheetBackup( payload : Object | any ){
      payload.subject = emailSubject;
      payload.text = text;
      payload.filename = filename;
- 
-     const progress : ProgressBar = startProgressBar({ text: 'Academic term broad sheet email backup', detail: `Backing up academic term students broad sheets for ${payload.year + '_' + expandNeat( payload.term) } to registered emails...`, backupType : `${payload.year + '_' + expandNeat( payload.term ) } academic broad sheets`});
+              const progress : ProgressBar = startProgressBar({ text: 'Academic term broad sheet email backup', detail: `Backing up academic term students broad sheets for ${payload.year + '_' + expandNeat( payload.term) } to registered emails...`, backupType : `${payload.year + '_' + expandNeat( payload.term ) } academic broad sheets`});
  
      // send the email with the email service class
      const done = await new EmailSenderService().sendEmail( payload );
@@ -1550,11 +1552,10 @@ async function handleAcademicBroadsheetBackup( payload : Object | any ){
          });
      };
  
-     progress.close();
 }
 
 async function handleScoresBackup( payload : Object | any ){
-     // construct the html for the academic session backup
+     // construct the html for the academic session backup             
      const html = `<h3 style="color:green;text-align:center"> Academic scores for ${ payload.year + ' ' + expandNeat( payload.term ) } </h3>
      <p style="text-align:justify"> The attachment below is a zip folder containing the academic scores for all classes for the <strong style="color:midnightblue;text-align:justify"> ${ expandNeat( payload.term ).toLowerCase() }. </strong> </p>
      <p style="text-align:justify"> You are receiving this message from Quatron because you have registered this email address as a listener to the backup option. <strong><i> If you do not want to receive backup messages and data from Quatron, kindly deregister this address on the application. </i></strong> </p>
@@ -1621,17 +1622,6 @@ async function handleOtherItemsBackup ( payload : Object | any ){
      progress.close();
 }
 
-fs.readFile(path.join( __dirname, 'test.txt'), {encoding: 'utf-8'}, function(error, data){
-    if( error ){
-        console.log( error ); return;
-    }
-    const array : string[] = data.split('@comment').map((token : string) => {
-        let word = '';
-        for ( let i = 0; i < token.length; i++ ){
-            if( token.charAt(i) !== '\r' && token.charAt(i) !== '\n' ){ word += token.charAt(i) }
-        }
-        return word.trim();
-    }).filter((token : string) => token !== '');
-
-    console.log( array );
-});
+// console.log( new TeacherComment().loa )
+new TeacherComment().loadComments( CommentType.Teacher_Good_Behaviour, { includeDefault : false })
+.then( (data : string[]) => console.log( data ));
