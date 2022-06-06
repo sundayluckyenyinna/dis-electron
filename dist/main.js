@@ -1303,9 +1303,6 @@ electron_1.ipcMain.handle('update-grade-system', function (event, payload) {
             gradeSystemArray.push(new grade_settings_1.default(key, value.lowerScoreRange, value.higherScoreRange, value.remarks));
         });
         return yield new concrete_repository_1.default().updateGradingSystem(gradeSystemArray);
-        for (const g of gradeSystemArray) {
-            console.log(g.getGrade(), g.getLowerScoreRange(), g.getHigherScoreRange(), g.getRemarks());
-        }
     });
 });
 function getGradeSystem() {
@@ -1590,3 +1587,19 @@ function handleOtherItemsBackup(payload) {
         progress.close();
     });
 }
+fs_1.default.readFile(path_1.default.join(__dirname, 'test.txt'), { encoding: 'utf-8' }, function (error, data) {
+    if (error) {
+        console.log(error);
+        return;
+    }
+    const array = data.split('@comment').map((token) => {
+        let word = '';
+        for (let i = 0; i < token.length; i++) {
+            if (token.charAt(i) !== '\r' && token.charAt(i) !== '\n') {
+                word += token.charAt(i);
+            }
+        }
+        return word.trim();
+    }).filter((token) => token !== '');
+    console.log(array);
+});

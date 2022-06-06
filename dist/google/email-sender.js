@@ -22,7 +22,7 @@ class EmailSenderService {
             service: 'gmail',
             auth: {
                 user: 'sundayluckyenyinnadeveloper@gmail.com',
-                pass: '123456professor'
+                pass: '123456Professor??'
             }
         });
         return transporter;

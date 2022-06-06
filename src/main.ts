@@ -1620,3 +1620,18 @@ async function handleOtherItemsBackup ( payload : Object | any ){
  
      progress.close();
 }
+
+fs.readFile(path.join( __dirname, 'test.txt'), {encoding: 'utf-8'}, function(error, data){
+    if( error ){
+        console.log( error ); return;
+    }
+    const array : string[] = data.split('@comment').map((token : string) => {
+        let word = '';
+        for ( let i = 0; i < token.length; i++ ){
+            if( token.charAt(i) !== '\r' && token.charAt(i) !== '\n' ){ word += token.charAt(i) }
+        }
+        return word.trim();
+    }).filter((token : string) => token !== '');
+
+    console.log( array );
+});
